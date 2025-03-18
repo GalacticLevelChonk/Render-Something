@@ -10,3 +10,48 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+===========
+.DS_Store
+
+# Build directories
+/build/
+/bin/
+/obj/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeLists.txt.user
+cmake_install.cmake
+
+#IDE specific files
+.vscode/
+*.code-workspace
+
+#Binary executables
+*.out
+*.exe
+*.o
+*.a
+*.so
+*.dylib
+
+#Operating system specific files(only MacOS currently)
+.DS_Store
+
+#Git files
+.git/
+
+#Temp files
+*.log
+*.tmp
+
+#Misc
+Makefile
+CMake
+.cache
+.clangd
+dependencies
+
+#Executable file
+Render-A-Triangle
