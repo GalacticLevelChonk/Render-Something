@@ -1,4 +1,5 @@
 #include "rsInstance.hpp"
+#include "rsQueue.hpp"
 
 namespace RS{
     void rsInstance::PickPhysicalDevice(){
@@ -20,12 +21,15 @@ namespace RS{
     }
 
     bool rsInstance::isDeviceSuitable(VkPhysicalDevice physicalDevice){
+        rsQueue graphicsQueue;
+        QueueFamilyIndices indices = graphicsQueue.FindQueueFamily(physicalDevice);
+
         VkPhysicalDeviceFeatures deviceFeatures;
         VkPhysicalDeviceProperties deviceProperties;
 
         vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
         vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
-        return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+        return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU && indices.isComplete();
     }
 }
