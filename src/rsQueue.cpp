@@ -1,6 +1,5 @@
 #include "rsQueue.hpp"
 #include <cstdint>
-#include <stdexcept>
 
 namespace RS{
     QueueFamilyIndices rsQueue::FindQueueFamily(VkPhysicalDevice device){
