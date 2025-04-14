@@ -59,26 +59,4 @@ namespace RS{
             throw std::runtime_error("Failed to create instance error code: " + std::to_string(result) + "!");
         }
     }
-
-    void rsInstance::PickPhysicalDevice(){
-        uint32_t physicalDeviceCount = 0;
-        vkEnumeratePhysicalDevices(m_Instance,&physicalDeviceCount, nullptr);
-
-        std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
-        vkEnumeratePhysicalDevices(m_Instance,&physicalDeviceCount, physicalDevices.data());
-
-        for(const auto& physicalDevice : physicalDevices){
-            if(isDeviceSuitable(physicalDevice)){
-                m_PhysicalDevice = physicalDevice;
-                break;
-            }
-        }
-        if(m_PhysicalDevice == VK_NULL_HANDLE){
-            throw std::runtime_error("Failed to find suitable GPU");
-        }
-    }
-
-    bool rsInstance::isDeviceSuitable(VkPhysicalDevice physicalDevice){
-        return true;
-    }
 }
