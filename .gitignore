@@ -51,6 +51,7 @@ Makefile
 CMake
 .cache
 .clangd
+.VSCodeCounter
 dependencies
 
 #Executable file
