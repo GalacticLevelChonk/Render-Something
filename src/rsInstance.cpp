@@ -10,9 +10,9 @@ namespace RS{
 
     void rsInstance::createInstance(){
         #ifdef NDEBUG
-            const bool enableValidationLayers = false;
+            enableValidationLayers = false;
         #else
-            const bool enableValidationLayers = true;
+            enableValidationLayers = true;
         #endif
             
         if(enableValidationLayers && !m_ValidationLayers.CheckValidationSupport()){
