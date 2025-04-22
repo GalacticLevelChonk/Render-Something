@@ -4,6 +4,7 @@
 namespace RS{
     class rsInstance{
         public:
+            VkDevice device;
 
             rsInstance(VkInstance& instance);
 
@@ -11,8 +12,12 @@ namespace RS{
 
             void PickPhysicalDevice();
 
+            void createLogicalDevice();
+
         private:
             rsValidationLayers m_ValidationLayers;
+
+            bool enableValidationLayers = false;
 
             VkInstance m_Instance;
 

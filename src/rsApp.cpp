@@ -11,6 +11,7 @@ namespace RS{
     void rsApp::initVulkan(){
         appInstance.createInstance();
         appInstance.PickPhysicalDevice();
+        appInstance.createLogicalDevice();
     }
 
     void rsApp::mainLoop(){
@@ -23,5 +24,7 @@ namespace RS{
         glfwDestroyWindow(window);
 
         glfwTerminate();
+
+        vkDestroyDevice(appInstance.device, nullptr);
     }
 }
