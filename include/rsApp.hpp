@@ -15,6 +15,7 @@ namespace RS{
 
             GLFWwindow* window;
             rsWindow appWindow;
+            VkSurfaceKHR surface;
 
             VkInstance instance;
             rsInstance appInstance{instance};

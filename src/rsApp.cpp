@@ -9,8 +9,9 @@ namespace RS{
     }
 
     void rsApp::initVulkan(){
-        appInstance.createInstance();
-        appInstance.PickPhysicalDevice();
+        appInstance.createInstance(instance);
+        appWindow.createSurface(instance, window,surface);
+        appInstance.PickPhysicalDevice(instance);
         appInstance.createLogicalDevice();
     }
 

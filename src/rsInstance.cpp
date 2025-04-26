@@ -1,14 +1,15 @@
 #include "rsInstance.hpp"
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_macos.h> 
 #include <cstdint>
 #include <stdexcept>
 
 namespace RS{
-    rsInstance::rsInstance(VkInstance& instance) : m_Instance(instance){
-        createInstance();
+    rsInstance::rsInstance(VkInstance& instance){
+        createInstance(instance);
     }
 
-    void rsInstance::createInstance(){
+    void rsInstance::createInstance(VkInstance &instance){
         #ifdef NDEBUG
             enableValidationLayers = false;
         #else
@@ -38,7 +39,7 @@ namespace RS{
             requiredExtensions.emplace_back(glfwExtensions[i]);
         }
 
-        requiredExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+       requiredExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -48,13 +49,13 @@ namespace RS{
         createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
         if(enableValidationLayers){
-            createInfo.enabledLayerCount = 0;
+            createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.validationLayers.size());
             createInfo.ppEnabledLayerNames = m_ValidationLayers.validationLayers.data();
         } else{
             createInfo.enabledLayerCount = 0;
         }
 
-        VkResult result = vkCreateInstance(&createInfo, nullptr, &m_Instance);
+        VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
         if(result != VK_SUCCESS){
             throw std::runtime_error("Failed to create instance error code: " + std::to_string(result) + "!");
         }

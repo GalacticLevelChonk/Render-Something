@@ -1,14 +1,15 @@
 #include "rsInstance.hpp"
 #include "rsQueue.hpp"
+#include <vulkan/vulkan.hpp>
 #include <cstdint>
 
 namespace RS{
-    void rsInstance::PickPhysicalDevice(){
+    void rsInstance::PickPhysicalDevice(VkInstance instance){
         uint32_t physicalDeviceCount = 0;
-        vkEnumeratePhysicalDevices(m_Instance,&physicalDeviceCount, nullptr);
+        vkEnumeratePhysicalDevices(instance,&physicalDeviceCount, nullptr);
 
         std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
-        vkEnumeratePhysicalDevices(m_Instance,&physicalDeviceCount, physicalDevices.data());
+        vkEnumeratePhysicalDevices(instance,&physicalDeviceCount, physicalDevices.data());
 
         for(const auto& physicalDevice : physicalDevices){
             if(isDeviceSuitable(physicalDevice)){
@@ -49,6 +50,10 @@ namespace RS{
 
         VkPhysicalDeviceFeatures deviceFeatures{};
 
+        std::vector<const char*> deviceExtensions = {
+            "VK_KHR_portability_subset"
+        };
+
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         createInfo.pQueueCreateInfos = &queueCreateInfo;
@@ -56,7 +61,8 @@ namespace RS{
        
         createInfo.pEnabledFeatures = &deviceFeatures;
 
-        createInfo.enabledExtensionCount = 0;
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
         if(enableValidationLayers){
             createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.validationLayers.size());

@@ -8,9 +8,9 @@ namespace RS{
 
             rsInstance(VkInstance& instance);
 
-            void createInstance();
+            void createInstance(VkInstance &instance);
 
-            void PickPhysicalDevice();
+            void PickPhysicalDevice(VkInstance instance);
 
             void createLogicalDevice();
 
@@ -18,8 +18,6 @@ namespace RS{
             rsValidationLayers m_ValidationLayers;
 
             bool enableValidationLayers = false;
-
-            VkInstance m_Instance;
 
             bool isDeviceSuitable(VkPhysicalDevice physicalDevice);
 

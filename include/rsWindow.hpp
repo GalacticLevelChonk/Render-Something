@@ -8,5 +8,7 @@ namespace RS{
     class rsWindow{
         public:
             void initWindow(GLFWwindow*& window, int WIDTH, int HEIGHT, std::string name);
+
+            void createSurface(VkInstance instance, GLFWwindow *window, VkSurfaceKHR &surface);
     };
 }
