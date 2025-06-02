@@ -2,7 +2,6 @@
 
 namespace RS{
     void rsApp::run(){
-        appWindow.initWindow(window, 1000, 800, "Vulkan");
         initVulkan();
         mainLoop();
         cleanup();
@@ -11,8 +10,10 @@ namespace RS{
     void rsApp::initVulkan(){
         appInstance.createInstance(instance);
         appWindow.createSurface(instance, window,surface);
-        appInstance.PickPhysicalDevice(instance, surface);
+        appInstance.pickPhysicalDevice(instance, surface);
         appInstance.createLogicalDevice(surface);
+        appSwapChain.createSwapChain(appInstance.device, appInstance.physicalDevice, surface);
+        swapChain = appSwapChain.getSwapChain();
     }
 
     void rsApp::mainLoop(){
@@ -26,9 +27,11 @@ namespace RS{
 
         glfwTerminate();
 
-        vkDestroySurfaceKHR(instance, surface, nullptr);
+        appSwapChain.destroySwapChain(appInstance.device);
 
         vkDestroyDevice(appInstance.device, nullptr);
+
+        vkDestroySurfaceKHR(instance, surface, nullptr);
 
         vkDestroyInstance(instance, nullptr);
     }

@@ -1,24 +1,28 @@
 #include "rsInstance.hpp"
 #include "rsQueue.hpp"
-#include <vulkan/vulkan.hpp>
+#include "rsSwapChain.hpp"
+
+#include <stdexcept>
 #include <cstdint>
 #include <set>
 
+#include <vulkan/vulkan.hpp>
+
 namespace RS{
-    void rsInstance::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface){
+    void rsInstance::pickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface){
         uint32_t physicalDeviceCount = 0;
         vkEnumeratePhysicalDevices(instance,&physicalDeviceCount, nullptr);
 
         std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
         vkEnumeratePhysicalDevices(instance,&physicalDeviceCount, physicalDevices.data());
 
-        for(const auto& physicalDevice : physicalDevices){
-            if(isDeviceSuitable(physicalDevice, surface)){
-                m_PhysicalDevice = physicalDevice;
+        for(const auto& currentPhysicalDevice : physicalDevices){
+            if(isDeviceSuitable(currentPhysicalDevice, surface)){
+                physicalDevice = currentPhysicalDevice;
                 break;
             }
         }
-        if(m_PhysicalDevice == VK_NULL_HANDLE){
+        if(physicalDevice == VK_NULL_HANDLE){
             throw std::runtime_error("Failed to find suitable GPU");
         }
     }
@@ -33,13 +37,40 @@ namespace RS{
         vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
         vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
-        return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU && indices.isComplete();
+        m_extensionSupport = checkDeviceExtensionSupport(physicalDevice);
+
+        bool swapChainAdequate = false;
+
+        if(m_extensionSupport){
+            SwapChainSupportDetails swapChainSupport;
+            swapChainSupport = swapChainSupport.querySwapChainSupport(physicalDevice, surface);
+
+            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+        }
+
+        return deviceProperties.deviceType == indices.isComplete() && m_extensionSupport && swapChainAdequate;
+    }
+
+    bool rsInstance::checkDeviceExtensionSupport(VkPhysicalDevice device){
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+        std::vector<VkExtensionProperties> availableExtension(extensionCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,availableExtension.data());
+
+        std::set<std::string> requiredExtension(m_DeviceFeatures.begin(), m_DeviceFeatures.end());
+
+        for(const auto &extension : availableExtension){
+            requiredExtension.erase(extension.extensionName);
+        }
+
+        return requiredExtension.empty();
     }
 
     void rsInstance::createLogicalDevice(VkSurfaceKHR surface){
         rsQueue graphicsQueue;
 
-        QueueFamilyIndices indices = graphicsQueue.FindQueueFamily(m_PhysicalDevice, surface);
+        QueueFamilyIndices indices = graphicsQueue.FindQueueFamily(physicalDevice, surface);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
         std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -57,8 +88,10 @@ namespace RS{
         VkPhysicalDeviceFeatures deviceFeatures{};
 
         std::vector<const char*> deviceExtensions = {
-            "VK_KHR_portability_subset"
+            "VK_KHR_portability_subset",
         };
+
+        deviceExtensions.insert(deviceExtensions.end(), m_DeviceFeatures.begin(), m_DeviceFeatures.end());
 
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -78,7 +111,7 @@ namespace RS{
             createInfo.enabledLayerCount = 0;
         }
 
-        VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &device);
+        VkResult result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
         if(result != VK_SUCCESS){
             throw std::runtime_error("Failed to create logicial device error code: " + std::to_string(result) + "!");
         }

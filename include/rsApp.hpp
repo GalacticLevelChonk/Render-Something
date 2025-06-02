@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include "rsWindow.hpp"
 #include "rsInstance.hpp"
+#include "rsSwapChain.hpp"
 
 namespace RS{
     class rsApp{
@@ -13,11 +14,15 @@ namespace RS{
             void mainLoop();
             void cleanup();
 
-            GLFWwindow* window;
             rsWindow appWindow;
+            GLFWwindow* window = appWindow.getWindow();
+            
             VkSurfaceKHR surface;
 
-            VkInstance instance;
             rsInstance appInstance{instance};
+            VkInstance instance;
+
+            rsSwapChain appSwapChain{window};
+            VkSwapchainKHR swapChain;
     };
 }
