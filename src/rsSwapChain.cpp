@@ -121,6 +121,13 @@ namespace RS{
         if(result != VK_SUCCESS){
             throw std::runtime_error("Failed to create swap chain error code: " + std::to_string(result) + "!");
         }
+
+        vkGetSwapchainImagesKHR(device,m_swapChain, &imageCount, nullptr);
+        m_swapChainImages.resize(imageCount);
+        vkGetSwapchainImagesKHR(device, m_swapChain, &imageCount, m_swapChainImages.data());
+
+        m_swapChainImageFormat = surfaceFormat.format;
+        m_swapChainExtent = extent;
     }
 
     VkSwapchainKHR rsSwapChain::getSwapChain(){
@@ -129,5 +136,37 @@ namespace RS{
 
     void rsSwapChain::destroySwapChain(VkDevice device){
         vkDestroySwapchainKHR(device, m_swapChain, nullptr);
+    }
+
+    void rsSwapChain::createImageViews(VkDevice device){
+        m_swapChainImageViews.resize(m_swapChainImages.size());
+
+        for(size_t i = 0; i < m_swapChainImages.size(); i++){
+            VkImageViewCreateInfo imageViewCreateInfo{};
+            imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            imageViewCreateInfo.image = m_swapChainImages[i];
+            imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            imageViewCreateInfo.format = m_swapChainImageFormat;
+            imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+            imageViewCreateInfo.subresourceRange.layerCount = 1;
+            imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+            imageViewCreateInfo.subresourceRange.levelCount = 1;
+
+            VkResult result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]);
+            if(result != VK_SUCCESS){
+                throw std::runtime_error("Failed to create image view at index " + std::to_string(i) + " error code: "  = std::to_string(result) + "!");
+            }
+        }
+    }
+
+    void rsSwapChain::destroyImageViews(VkDevice device){
+        for(auto imageView : m_swapChainImageViews){
+            vkDestroyImageView(device, imageView, nullptr);
+        }
     }
 }
